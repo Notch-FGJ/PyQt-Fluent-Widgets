@@ -2,23 +2,86 @@
 from enum import Enum
 from typing import Dict, Union
 
-from PyQt6.QtCore import Qt, QPropertyAnimation, QRect, QSize, QEvent, QEasingCurve, pyqtSignal, QPoint
-from PyQt6.QtGui import QResizeEvent, QIcon, QColor, QPainterPath
+from PyQt6.QtCore import Qt, QPropertyAnimation, QRect, QSize, QEvent, QEasingCurve, pyqtSignal, QPoint, QMargins
+from PyQt6.QtGui import QResizeEvent, QIcon, QColor, QPainterPath, QPainter, QCursor, QPen
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QFrame, QApplication, QHBoxLayout
 
 from .navigation_widget import (NavigationTreeWidgetBase, NavigationToolButton, NavigationWidget, NavigationSeparator,
-                                NavigationTreeWidget, NavigationFlyoutMenu)
+                                NavigationTreeWidget, NavigationFlyoutMenu, NavigationPushButton)
 from ..widgets.acrylic_label import AcrylicBrush
 from ..widgets.scroll_area import SingleDirectionScrollArea
 from ..widgets.tool_tip import ToolTipFilter
 from ..widgets.flyout import Flyout, FlyoutAnimationType, FlyoutViewBase, SlideRightFlyoutAnimationManager
 from ..material.acrylic_flyout import AcrylicFlyout, AcrylicFlyoutViewBase
 from ...common.router import qrouter
-from ...common.style_sheet import FluentStyleSheet, isDarkTheme
+from ...common.style_sheet import FluentStyleSheet, isDarkTheme, themeColor
 from ...common.icon import FluentIconBase
 from ...common.icon import FluentIcon as FIF
 
+class NavigationMenuButton(NavigationPushButton):
+    def __init__(self, parent=None):
+        super().__init__(None,"",False,parent)
+        
+    def _margins(self):
+        return QMargins(0, 0, 0, 0)
 
+    def _canDrawIndicator(self):
+        return self.isSelected
+
+    def text(self):
+        pass
+    
+    def setText(self):
+        pass
+    
+    def icon(self):
+        pass
+    
+    def setIcon(self):
+        pass
+    
+    def paintEvent(self, e):
+        painter = QPainter(self)
+        painter.setRenderHints(QPainter.RenderHint.Antialiasing |
+                               QPainter.RenderHint.TextAntialiasing | QPainter.RenderHint.SmoothPixmapTransform)
+        painter.setPen(Qt.PenStyle.NoPen)
+
+        if self.isPressed:
+            painter.setOpacity(0.7)
+        if not self.isEnabled():
+            painter.setOpacity(0.4)
+
+        # draw background
+        c = 255 if isDarkTheme() else 0
+        m = self._margins()
+        pl, pr = m.left(), m.right()
+        globalRect = QRect(self.mapToGlobal(QPoint()), self.size())
+
+        if self._canDrawIndicator():
+            painter.setBrush(QColor(c, c, c, 6 if self.isEnter else 10))
+            painter.drawRoundedRect(self.rect(), 5, 5)
+
+            # draw indicator
+            painter.setBrush(themeColor())
+            painter.drawRoundedRect(pl, 10, 3, 16, 1.5, 1.5)
+        elif self.isEnter and self.isEnabled() and globalRect.contains(QCursor.pos()):
+            painter.setBrush(QColor(c, c, c, 10))
+            painter.drawRoundedRect(self.rect(), 5, 5)
+
+        painter.setPen(QPen(QColor(c,c,c),1))
+        baseHeight = int(self.height()/2)
+        width = self.width()
+        if self.isEnter:
+            offset = 5
+        else:
+            offset = 7
+        painter.drawLine(10,baseHeight + offset,width-10,baseHeight + offset)
+        painter.drawLine(10,baseHeight,width-10,baseHeight)
+        painter.drawLine(10,baseHeight - offset,width-10,baseHeight - offset)
+        
+    def setCompacted(self, isCompacted: bool):
+        self.setFixedSize(40, 36)
+        
 class NavigationDisplayMode(Enum):
     """ Navigation display mode """
     MINIMAL = 0
@@ -74,7 +137,7 @@ class NavigationPanel(QFrame):
         self.scrollArea = SingleDirectionScrollArea(self)
         self.scrollWidget = QWidget()
 
-        self.menuButton = NavigationToolButton(FIF.MENU, self)
+        self.menuButton = NavigationMenuButton(self)
         self.returnButton = NavigationToolButton(FIF.RETURN, self)
 
         self.vBoxLayout = NavigationItemLayout(self)
@@ -528,9 +591,7 @@ class NavigationPanel(QFrame):
         self.setCurrentItem(widget.property('routeKey'))
 
         isLeaf = not isinstance(widget, NavigationTreeWidgetBase) or widget.isLeaf()
-        if self.displayMode == NavigationDisplayMode.MENU and isLeaf:
-            self.collapse()
-        elif self.isCollapsed():
+        if self.isCollapsed():
             self._showFlyoutNavigationMenu(widget)
 
     def _showFlyoutNavigationMenu(self, widget: NavigationTreeWidget):
@@ -595,7 +656,7 @@ class NavigationPanel(QFrame):
 
         if e.type() == QEvent.Type.MouseButtonRelease:
             if not self.geometry().contains(e.pos()) and self.displayMode == NavigationDisplayMode.MENU:
-                self.collapse()
+                pass
         elif e.type() == QEvent.Type.Resize:
             w = e.size().width()
             if w < self.minimumExpandWidth and self.displayMode == NavigationDisplayMode.EXPAND:
