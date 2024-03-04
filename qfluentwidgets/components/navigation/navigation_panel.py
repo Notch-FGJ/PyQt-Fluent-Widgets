@@ -75,9 +75,9 @@ class NavigationMenuButton(NavigationPushButton):
             offset = 5
         else:
             offset = 7
-        painter.drawLine(10,baseHeight + offset,width-10,baseHeight + offset)
-        painter.drawLine(10,baseHeight,width-10,baseHeight)
-        painter.drawLine(10,baseHeight - offset,width-10,baseHeight - offset)
+        painter.drawLine(12,baseHeight + offset,width-12,baseHeight + offset)
+        painter.drawLine(12,baseHeight,width-12,baseHeight)
+        painter.drawLine(12,baseHeight - offset,width-12,baseHeight - offset)
         
     def setCompacted(self, isCompacted: bool):
         self.setFixedSize(40, 36)
