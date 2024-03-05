@@ -74,7 +74,7 @@ class NavigationMenuButton(NavigationPushButton):
         if self.isEnter:
             offset = 5
         else:
-            offset = 7
+            offset = 6
         painter.drawLine(12,baseHeight + offset,width-12,baseHeight + offset)
         painter.drawLine(12,baseHeight,width-12,baseHeight)
         painter.drawLine(12,baseHeight - offset,width-12,baseHeight - offset)
