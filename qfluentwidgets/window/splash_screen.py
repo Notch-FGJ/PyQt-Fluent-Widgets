@@ -2,13 +2,13 @@
 from typing import Union
 
 from PyQt6.QtCore import Qt, QSize, QRectF, QEvent
-from PyQt6.QtGui import QPixmap, QPainter, QColor, QIcon
+from PyQt6.QtGui import QCloseEvent, QPixmap, QPainter, QColor, QIcon
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QGraphicsDropShadowEffect
 
 from ..common.icon import FluentIconBase, drawIcon, toQIcon
 from ..common.style_sheet import isDarkTheme, FluentStyleSheet
 from ..components.widgets import IconWidget, IndeterminateProgressRing
-from qframelesswindow import TitleBar
+from qframelesswindow import TitleBarWithoutButton
 
 
 
@@ -20,7 +20,7 @@ class SplashScreen(QWidget):
         self._icon = icon
         self._iconSize = QSize(96, 96)
 
-        self.titleBar = TitleBar(self)
+        self.titleBar = TitleBarWithoutButton(self)
         self.iconWidget = IconWidget(icon, self)
         self.progressRing = IndeterminateProgressRing(self)
         self.progressRing.setFixedSize(50, 50)
@@ -81,6 +81,7 @@ class SplashScreen(QWidget):
     def finish(self):
         """ close splash screen """
         self.close()
+        
 
     def paintEvent(self, e):
         painter = QPainter(self)
