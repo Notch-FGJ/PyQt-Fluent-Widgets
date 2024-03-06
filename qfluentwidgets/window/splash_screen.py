@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QGraphicsDropShadowEffect
 
 from ..common.icon import FluentIconBase, drawIcon, toQIcon
 from ..common.style_sheet import isDarkTheme, FluentStyleSheet
-from ..components.widgets import IconWidget
+from ..components.widgets import IconWidget, IndeterminateProgressRing
 from qframelesswindow import TitleBar
 
 
@@ -22,6 +22,10 @@ class SplashScreen(QWidget):
 
         self.titleBar = TitleBar(self)
         self.iconWidget = IconWidget(icon, self)
+        self.progressRing = IndeterminateProgressRing(self)
+        self.progressRing.setFixedSize(50, 50)
+        self.progressRing.setStrokeWidth(7)
+        
         self.shadowEffect = QGraphicsDropShadowEffect(self)
 
         self.iconWidget.setFixedSize(self._iconSize)
@@ -86,3 +90,8 @@ class SplashScreen(QWidget):
         c = 32 if isDarkTheme() else 255
         painter.setBrush(QColor(c, c, c))
         painter.drawRect(self.rect())
+
+        # progressRing center
+        x, y = self.width()//2, self.height()//2
+        self.progressRing.move(x - self.progressRing.width()//2, y - self.progressRing.height()//2 + self._iconSize.height() * 2)
+        
