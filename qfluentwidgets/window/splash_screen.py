@@ -8,9 +8,14 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QGraphicsDropShadowEffect
 from ..common.icon import FluentIconBase, drawIcon, toQIcon
 from ..common.style_sheet import isDarkTheme, FluentStyleSheet
 from ..components.widgets import IconWidget, IndeterminateProgressRing
-from qframelesswindow import TitleBarWithoutButton
+from qframelesswindow import TitleBarBase
 
-
+class TitleBarWithoutButton(TitleBarBase):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.minBtn.hide()
+        self.maxBtn.hide()
+        self.closeBtn.hide()
 
 class SplashScreen(QWidget):
     """ Splash screen """
